@@ -554,6 +554,19 @@ with st.sidebar:
             step=5,
             help="How often to refresh market data"
         )
+        
+        # Automatic periodic refresh using session timestamp
+        # Rerun the app when the chosen refresh interval has elapsed
+        now_ts = time.time()
+        last_ts = st.session_state.get('last_auto_refresh_ts', 0.0)
+        last_interval = st.session_state.get('last_auto_refresh_interval', refresh_secs)
+        # If the interval changed, force a new schedule
+        if last_interval != refresh_secs:
+            st.session_state['last_auto_refresh_interval'] = refresh_secs
+            st.session_state['last_auto_refresh_ts'] = now_ts
+        elif now_ts - last_ts >= float(refresh_secs):
+            st.session_state['last_auto_refresh_ts'] = now_ts
+            st.rerun()
     
     # Strategy Configuration
     st.markdown('<div class="section-header">🎯 Strategy Configuration</div>', unsafe_allow_html=True)
